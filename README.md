@@ -27,14 +27,14 @@ npm test
 ## Write-up
 
 **Tradeoffs.** The API 401s without a bearer token, so every request goes through a Next
-route handler rather than the browser. First, `?q=`
-is a full-text search across *every* field, returned alphabetically with no score: typing `can` puts American Samoa first and Canada twelfth — Anguilla ranks second
+route handler rather than the browser. 
+It is a full-text search across *every* field, returned alphabetically with no score: typing `can` puts American Samoa first and Canada twelfth — Anguilla ranks second
 because its flag description contains "the canton". Each result carries a `_match` array
 naming the fields that matched, so the proxy re-ranks on it: exact name beats prefix beats
 code beats capital beats demonym, with prose fields scored near zero. Second, it projects
 35-field, ~6KB-per-country records down to six fields, cutting a 159KB response to ~1.2KB.
 
-On the client Debounce is 250ms; each keystroke aborts the in-flight
+On the client debounce is 250ms; each keystroke aborts the in-flight
 request *and* bumps a request id that the resolver re-checks before setting state. Both are
 needed — `abort()` cannot unwind a response already queued as a microtask. Upstream TTFB
 measured 0.75–1.9s, so previous results stay on screen, dimmed, instead of flashing empty.
